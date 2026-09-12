@@ -1,1 +1,923 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>FIR Report Generator — Cyber Satyameva Bureau | TinkerHub Useless Projects</title>
+    <meta name="description" content="Satirical Cyber-Police FIR generator for fake WhatsApp forwards, unverified cures, and 6 AM good morning spam.">
+    
+    <!-- Google Fonts -->
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Anek+Malayalam:wght@400;600;700&family=Courier+Prime:ital,wght@0,400;0,700;1,400&family=Outfit:wght@300;400;600;800;900&family=Special+Elite&display=swap" rel="stylesheet">
+    
+    <style>
+        :root {
+            --bg-dark: #0f172a;
+            --bg-card: #1e293b;
+            --primary: #ef4444;
+            --primary-hover: #dc2626;
+            --accent: #f59e0b;
+            --text-main: #f8fafc;
+            --text-muted: #94a3b8;
+            --border-color: #334155;
+            
+            /* Paper Theme */
+            --paper-bg: #faf6ea;
+            --paper-border: #3a2a1d;
+            --stamp-red: #b22222;
+        }
 
+        * {
+            box-sizing: border-box;
+            margin: 0;
+            padding: 0;
+        }
+
+        body {
+            background-color: var(--bg-dark);
+            background-image: radial-gradient(rgba(239, 68, 68, 0.08) 1px, transparent 1px), radial-gradient(rgba(59, 130, 246, 0.05) 1px, transparent 1px);
+            background-size: 32px 32px;
+            background-position: 0 0, 16px 16px;
+            color: var(--text-main);
+            font-family: 'Outfit', -apple-system, BlinkMacSystemFont, sans-serif;
+            min-height: 100vh;
+            padding: 24px 16px;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+        }
+
+        .container {
+            width: 100%;
+            max-width: 1240px;
+            display: flex;
+            flex-direction: column;
+            gap: 24px;
+        }
+
+        /* Top Header */
+        header {
+            text-align: center;
+            background: linear-gradient(180deg, rgba(30, 41, 59, 0.9) 0%, rgba(15, 23, 42, 0.8) 100%);
+            border: 1px solid var(--border-color);
+            border-radius: 16px;
+            padding: 32px 24px;
+            backdrop-filter: blur(12px);
+            box-shadow: 0 20px 40px rgba(0,0,0,0.4);
+            position: relative;
+            overflow: hidden;
+        }
+
+        header::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: 0;
+            right: 0;
+            height: 4px;
+            background: linear-gradient(90deg, #ef4444, #f59e0b, #3b82f6, #ef4444);
+            background-size: 300% 100%;
+            animation: moveGradient 6s linear infinite;
+        }
+
+        @keyframes moveGradient {
+            0% { background-position: 0% 50%; }
+            100% { background-position: 300% 50%; }
+        }
+
+        .event-badge {
+            display: inline-flex;
+            align-items: center;
+            gap: 6px;
+            background: rgba(239, 68, 68, 0.15);
+            border: 1px solid rgba(239, 68, 68, 0.4);
+            color: #fca5a5;
+            font-size: 13px;
+            font-weight: 700;
+            padding: 6px 14px;
+            border-radius: 9999px;
+            text-transform: uppercase;
+            letter-spacing: 1px;
+            margin-bottom: 14px;
+        }
+
+        h1 {
+            font-size: clamp(26px, 4vw, 38px);
+            font-weight: 900;
+            letter-spacing: -0.5px;
+            color: #ffffff;
+            margin-bottom: 8px;
+        }
+
+        .subtitle {
+            font-size: clamp(14px, 2vw, 17px);
+            color: #94a3b8;
+            max-width: 800px;
+            margin: 0 auto 16px auto;
+            line-height: 1.5;
+        }
+
+        .disclaimer-banner {
+            display: inline-block;
+            background: rgba(245, 158, 11, 0.12);
+            border: 1px dashed rgba(245, 158, 11, 0.4);
+            color: #fcd34d;
+            font-size: 12.5px;
+            padding: 8px 16px;
+            border-radius: 8px;
+        }
+
+        /* Layout Grid */
+        .main-layout {
+            display: grid;
+            grid-template-columns: 1fr 1.15fr;
+            gap: 24px;
+            align-items: start;
+        }
+
+        @media (max-width: 960px) {
+            .main-layout {
+                grid-template-columns: 1fr;
+            }
+        }
+
+        /* Input Control Panel */
+        .panel {
+            background: var(--bg-card);
+            border: 1px solid var(--border-color);
+            border-radius: 16px;
+            padding: 24px;
+            box-shadow: 0 10px 30px rgba(0,0,0,0.3);
+        }
+
+        .panel-title {
+            font-size: 18px;
+            font-weight: 700;
+            margin-bottom: 16px;
+            display: flex;
+            align-items: center;
+            gap: 10px;
+            color: #f1f5f9;
+        }
+
+        .textarea-label {
+            display: block;
+            font-size: 13px;
+            font-weight: 600;
+            color: var(--text-muted);
+            margin-bottom: 8px;
+        }
+
+        textarea {
+            width: 100%;
+            height: 140px;
+            background: #0f172a;
+            border: 1.5px solid var(--border-color);
+            border-radius: 10px;
+            color: #f8fafc;
+            padding: 14px;
+            font-family: inherit;
+            font-size: 14px;
+            line-height: 1.5;
+            resize: vertical;
+            transition: all 0.2s ease;
+            outline: none;
+        }
+
+        textarea:focus {
+            border-color: var(--primary);
+            box-shadow: 0 0 0 3px rgba(239, 68, 68, 0.2);
+        }
+
+        .btn-submit {
+            width: 100%;
+            background: linear-gradient(135deg, #ef4444 0%, #b91c1c 100%);
+            color: #ffffff;
+            border: none;
+            border-radius: 10px;
+            padding: 14px 20px;
+            font-size: 16px;
+            font-weight: 700;
+            font-family: inherit;
+            cursor: pointer;
+            margin-top: 16px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            gap: 10px;
+            box-shadow: 0 4px 15px rgba(239, 68, 68, 0.4);
+            transition: all 0.2s ease;
+        }
+
+        .btn-submit:hover {
+            background: linear-gradient(135deg, #dc2626 0%, #991b1b 100%);
+            transform: translateY(-2px);
+            box-shadow: 0 6px 20px rgba(239, 68, 68, 0.5);
+        }
+
+        .btn-submit:active {
+            transform: translateY(0);
+        }
+
+        /* Sample Presets */
+        .samples-section {
+            margin-top: 24px;
+            border-top: 1px solid var(--border-color);
+            padding-top: 18px;
+        }
+
+        .samples-title {
+            font-size: 13px;
+            font-weight: 700;
+            color: var(--text-muted);
+            text-transform: uppercase;
+            letter-spacing: 0.5px;
+            margin-bottom: 12px;
+        }
+
+        .samples-grid {
+            display: flex;
+            flex-direction: column;
+            gap: 8px;
+        }
+
+        .sample-pill {
+            background: #0f172a;
+            border: 1px solid var(--border-color);
+            color: #cbd5e1;
+            padding: 10px 14px;
+            border-radius: 8px;
+            font-size: 12.5px;
+            text-align: left;
+            cursor: pointer;
+            transition: all 0.2s ease;
+            display: flex;
+            align-items: center;
+            gap: 8px;
+        }
+
+        .sample-pill:hover {
+            background: #1e293b;
+            border-color: #ef4444;
+            color: #ffffff;
+            transform: translateX(4px);
+        }
+
+        .counter-badge {
+            background: #0f172a;
+            border: 1px solid var(--border-color);
+            padding: 10px 14px;
+            border-radius: 8px;
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            margin-top: 18px;
+            font-size: 13px;
+        }
+
+        /* FIR Paper Document */
+        .fir-wrapper {
+            width: 100%;
+            background-color: var(--paper-bg);
+            background-image: radial-gradient(#ece3cb 1px, transparent 1px);
+            background-size: 20px 20px;
+            color: #1a1a1a;
+            font-family: 'Courier Prime', 'Courier New', monospace;
+            padding: 28px 24px;
+            border: 3px double var(--paper-border);
+            box-shadow: 0 15px 35px rgba(0,0,0,0.5), inset 0 0 50px rgba(210, 180, 140, 0.25);
+            position: relative;
+            box-sizing: border-box;
+            border-radius: 6px;
+            overflow: hidden;
+            min-height: 520px;
+        }
+
+        .fir-watermark {
+            position: absolute;
+            top: 45%;
+            left: 50%;
+            transform: translate(-50%, -50%) rotate(-30deg);
+            font-size: 70px;
+            font-weight: 900;
+            color: rgba(180, 50, 50, 0.05);
+            text-transform: uppercase;
+            letter-spacing: 12px;
+            pointer-events: none;
+            user-select: none;
+            white-space: nowrap;
+            z-index: 0;
+            font-family: 'Special Elite', monospace;
+        }
+
+        .fir-header {
+            text-align: center;
+            border-bottom: 2px solid #2d241e;
+            padding-bottom: 12px;
+            margin-bottom: 16px;
+            position: relative;
+            z-index: 1;
+        }
+
+        .fir-emblem-svg {
+            width: 48px;
+            height: 48px;
+            margin: 0 auto 4px auto;
+            display: block;
+        }
+
+        .fir-dept-mal {
+            font-family: 'Anek Malayalam', sans-serif;
+            font-size: 14px;
+            font-weight: 700;
+            color: #2b3a4a;
+            margin: 0;
+        }
+
+        .fir-dept-eng {
+            font-size: 15px;
+            font-weight: 700;
+            color: #111;
+            margin: 2px 0;
+            letter-spacing: 1.2px;
+            text-transform: uppercase;
+        }
+
+        .fir-sub-cell {
+            font-size: 11px;
+            color: #554433;
+            font-style: italic;
+            margin-bottom: 8px;
+        }
+
+        .fir-main-title {
+            display: inline-block;
+            background-color: #2c3e50;
+            color: #ffffff;
+            padding: 5px 16px;
+            font-size: 13px;
+            font-weight: 700;
+            letter-spacing: 1.5px;
+            border-radius: 2px;
+            text-transform: uppercase;
+        }
+
+        .fir-meta-bar {
+            display: flex;
+            justify-content: space-between;
+            flex-wrap: wrap;
+            background: rgba(220, 205, 175, 0.4);
+            border: 1px dashed #7a6a55;
+            padding: 8px 12px;
+            margin-bottom: 16px;
+            font-size: 12px;
+            position: relative;
+            z-index: 1;
+        }
+
+        .fir-grid {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 12px;
+            margin-bottom: 16px;
+            position: relative;
+            z-index: 1;
+        }
+
+        @media (max-width: 580px) {
+            .fir-grid {
+                grid-template-columns: 1fr;
+            }
+        }
+
+        .fir-box {
+            background: rgba(255, 255, 255, 0.65);
+            border: 1px solid #c4b59d;
+            padding: 10px 12px;
+            border-radius: 3px;
+        }
+
+        .fir-box-title {
+            font-size: 10.5px;
+            font-weight: 700;
+            color: #8b0000;
+            text-transform: uppercase;
+            border-bottom: 1px solid #decbb5;
+            padding-bottom: 3px;
+            margin-bottom: 6px;
+            letter-spacing: 0.5px;
+        }
+
+        .fir-box-content {
+            font-size: 12px;
+            line-height: 1.4;
+            color: #222;
+        }
+
+        .fir-sections-container {
+            margin-bottom: 16px;
+            background: rgba(255, 245, 230, 0.75);
+            border: 1px solid #d4a373;
+            padding: 10px 12px;
+            border-radius: 3px;
+            position: relative;
+            z-index: 1;
+        }
+
+        .fir-sec-badge {
+            display: block;
+            background: #fff;
+            border-left: 4px solid #b22222;
+            border-right: 1px solid #e0d0c0;
+            border-top: 1px solid #e0d0c0;
+            border-bottom: 1px solid #e0d0c0;
+            padding: 5px 8px;
+            margin: 4px 0;
+            font-size: 11.5px;
+            font-weight: 700;
+            color: #660000;
+            border-radius: 0 3px 3px 0;
+        }
+
+        .fir-evidence-box {
+            background: #f1f6f1;
+            border: 1px solid #a3c4a3;
+            border-left: 5px solid #2e7d32;
+            padding: 10px 12px;
+            margin-bottom: 16px;
+            font-size: 12px;
+            position: relative;
+            z-index: 1;
+        }
+
+        .fir-evidence-title {
+            color: #1b5e20;
+            font-weight: 700;
+            font-size: 10.5px;
+            text-transform: uppercase;
+            margin-bottom: 4px;
+        }
+
+        .fir-evidence-text {
+            font-style: italic;
+            color: #2c3e50;
+            word-break: break-word;
+        }
+
+        .fir-remarks-box {
+            background: #fffdf7;
+            border: 1.5px solid #2c3e50;
+            padding: 12px;
+            margin-bottom: 16px;
+            position: relative;
+            z-index: 1;
+        }
+
+        .fir-remarks-title {
+            color: #1a252f;
+            font-weight: 700;
+            font-size: 11px;
+            text-transform: uppercase;
+            margin-bottom: 6px;
+            border-bottom: 1px dashed #aaa;
+            padding-bottom: 3px;
+        }
+
+        .fir-remarks-text {
+            font-size: 12.5px;
+            line-height: 1.45;
+            color: #111;
+        }
+
+        .fir-penalty-banner {
+            background: #fff3cd;
+            border: 2px dashed #856404;
+            color: #533f03;
+            padding: 10px 14px;
+            margin-bottom: 20px;
+            font-size: 12px;
+            font-weight: 700;
+            position: relative;
+            z-index: 1;
+            display: flex;
+            align-items: center;
+            gap: 10px;
+        }
+
+        .fir-rubber-stamp {
+            position: absolute;
+            bottom: 75px;
+            right: 25px;
+            border: 4px solid #b22222;
+            color: #b22222;
+            font-family: 'Special Elite', monospace;
+            font-size: 18px;
+            font-weight: 900;
+            text-transform: uppercase;
+            padding: 6px 14px;
+            transform: rotate(-12deg);
+            opacity: 0.88;
+            letter-spacing: 2px;
+            pointer-events: none;
+            user-select: none;
+            z-index: 2;
+            border-radius: 4px;
+            box-shadow: 0 0 0 2px #b22222;
+        }
+
+        .fir-footer {
+            display: flex;
+            justify-content: space-between;
+            align-items: flex-end;
+            border-top: 1px solid #7a6a55;
+            padding-top: 12px;
+            margin-top: 16px;
+            font-size: 10px;
+            position: relative;
+            z-index: 1;
+        }
+
+        .fir-action-bar {
+            display: flex;
+            justify-content: center;
+            gap: 10px;
+            margin-top: 16px;
+        }
+
+        .fir-btn {
+            background: #1f2937;
+            color: #f9fafb;
+            border: 1px solid #374151;
+            padding: 8px 16px;
+            font-family: inherit;
+            font-size: 12px;
+            font-weight: 700;
+            border-radius: 4px;
+            cursor: pointer;
+            transition: all 0.2s ease;
+            display: inline-flex;
+            align-items: center;
+            gap: 6px;
+        }
+
+        .fir-btn:hover {
+            background: #374151;
+            transform: translateY(-1px);
+        }
+
+        .placeholder-view {
+            text-align: center;
+            padding: 80px 20px;
+            color: #78716c;
+        }
+
+        /* Print Styling */
+        @media print {
+            body {
+                background: white !important;
+                padding: 0 !important;
+            }
+            .container, header, .panel, .fir-action-bar {
+                display: none !important;
+            }
+            #printable-fir {
+                display: block !important;
+                position: absolute;
+                left: 0;
+                top: 0;
+                width: 100% !important;
+                box-shadow: none !important;
+                border: 2px solid #000 !important;
+            }
+        }
+    </style>
+</head>
+<body>
+
+    <div class="container">
+        <!-- Header -->
+        <header>
+            <div class="event-badge">🚀 TinkerHub Useless Projects 3.0</div>
+            <h1>🚨 WhatsApp Forward FIR Report Generator 📜</h1>
+            <p class="subtitle">Kerala Digital Satya Pramanam Vibhagam (Cyber Satyameva Bureau — Special Family WhatsApp Cell). Instantly file satirical cyber-police complaints against unverified forwards, pseudo-medical cures, and 6 AM glitter rose spam.</p>
+            <div class="disclaimer-banner">⚠️ <strong>SATIRE ONLY:</strong> Parody document created for hackathon entertainment. Has no real legal value in any court or tea shop.</div>
+        </header>
+
+        <!-- Main Workspace -->
+        <div class="main-layout">
+            <!-- Left Panel -->
+            <div class="panel">
+                <div class="panel-title">📥 1. Enter Suspicious WhatsApp Forward</div>
+                <label class="textarea-label" for="forwardInput">Paste the suspicious message, rumor, or good morning forward:</label>
+                <textarea id="forwardInput" placeholder="e.g. UNESCO declared Indian Anthem best in world, Hot lemon water destroys 5G waves at 4 AM, Ambani free 500GB recharge..."></textarea>
+                
+                <button class="btn-submit" id="submitBtn">
+                    <span>🚨 File FIR & Issue Arrest Warrant</span>
+                </button>
+
+                <div class="counter-badge">
+                    <span>Total FIRs Filed Today:</span>
+                    <strong id="sessionCounterDisplay" style="color: #ef4444; font-family: monospace; font-size: 16px;">#1048</strong>
+                </div>
+
+                <div class="samples-section">
+                    <div class="samples-title">💡 Click to Test Classic Kerala WhatsApp Forwards:</div>
+                    <div class="samples-grid">
+                        <button class="sample-pill" data-text="BREAKING NEWS: UNESCO has just declared the Indian National Anthem as the BEST in the universe! Share with 10 groups immediately or bad luck will follow! 🇮🇳🙏">
+                            <span>🏛️</span> <span>UNESCO Best Anthem Declaration</span>
+                        </button>
+                        <button class="sample-pill" data-text="ATTENTION EVERYONE: Drinking hot boiled lemon water mixed with ginger and rock salt at 4:32 AM destroys all 5G radiation inside stomach! Doctors will hide this! 🍋⚡">
+                            <span>🍋</span> <span>4:32 AM Hot Lemon 5G Radiation Cure</span>
+                        </button>
+                        <button class="sample-pill" data-text="Urgent! Jio and Tata offering FREE 500GB 5G Recharge on Ambani grandson birthday. Click www.free-recharge-loot-5g-malayalam.xyz/win. Share with 15 friends! 🎁🔥">
+                            <span>🎁</span> <span>Ambani Birthday Free 500GB Recharge</span>
+                        </button>
+                        <button class="sample-pill" data-text="Reserve Bank of India confirms 2000 rupee notes contain Secret Nano-GPS chips connected directly to Mangalyaan satellite 120m underground! 🛰️💵">
+                            <span>🛰️</span> <span>2000 Rupee Nano GPS Satellite Chip</span>
+                        </button>
+                        <button class="sample-pill" data-text="Good Morning! Sending 45 glittering hibiscus flower images with divine flute music to all 18 family groups. Have a blessed and vibration-filled day! 🌺☀️✨">
+                            <span>🌺</span> <span>05:15 AM Glitter Rose WhatsApp Spam</span>
+                        </button>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Right Panel: Output Document -->
+            <div id="outputContainer">
+                <div class="fir-wrapper" id="printable-fir">
+                    <div class="placeholder-view">
+                        <svg style="width: 50px; height: 50px; margin-bottom: 12px; opacity: 0.5;" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5">
+                            <path d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z"/>
+                        </svg>
+                        <h3 style="font-size: 16px; margin-bottom: 6px;">NO ACTIVE CASE FILED</h3>
+                        <p style="font-size: 13px;">Enter a WhatsApp forward on the left and click <strong>'File FIR'</strong> to generate an official satirical police report.</p>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        let sessionCounter = 1048;
+
+        const IO_POOL = [
+            { name: "CI Rajan 'Factcheck' Pillai", rank: "Circle Inspector", station: "Cyber Forward Cell, Central Squad", badge: "KDSPV-901" },
+            { name: "SI Baby Mathew", rank: "Sub-Inspector", station: "Anti-Rumor Division, Kottayam West", badge: "KDSPV-412" },
+            { name: "DySP Somanathan Nair", rank: "Deputy Superintendent", station: "Special Task Force on Uncle Forwards", badge: "KDSPV-007" },
+            { name: "Inspector Anjali 'BlueTick' Varma", rank: "Inspector", station: "Family Group Admin Surveillance Wing", badge: "KDSPV-554" },
+            { name: "SI Varghese 'ForwardedAsReceived' Kurian", rank: "Sub-Inspector", station: "Malabar Morning Wish Squad", badge: "KDSPV-328" }
+        ];
+
+        const PUNISHMENTS = [
+            "3 days without Wi-Fi + mandatory 48-hour fact-check bootcamp and written apology to UNESCO.",
+            "Demoted from WhatsApp Family Group Admin to 'Read-Only' member status for 30 calendar days.",
+            "Confiscation of optical reading glasses between 06:00 AM and 08:30 AM (peak forward hours).",
+            "Sentenced to typing out 500 times: 'ഞാൻ ഇനിമുതൽ ഗ്രൂപ്പിൽ തള്ളുകൾ ഫോർവേഡ് ചെയ്യുകയില്ല' (I will not forward rumors in groups).",
+            "Permanent restriction to basic SMS; strictly banned from using 🙏, 🌺, and ☀️ emojis for 6 months.",
+            "Mandatory community service: Must reply 'Fake news uncle' to 50 dubious family group forwards."
+        ];
+
+        const FAKE_SECTIONS = [
+            "Sec 420-B: Vishwasa Chooshanam (Extreme Belief Exploitation via Forwarded Gifs)",
+            "Sec 69-U: Uncle Forward Pledge Act (Non-consensual 6 AM Good Morning Dissemination)",
+            "Sec 153-M: Uncensored Uncle Propaganda (Pseudo-Ayurvedic & Lemon Microwave Cures)",
+            "Sec 302-G: Murder of Common Sense in Broad Daylight",
+            "Sec 144-W: Unlawful Assembly of 10+ Emojis in a Single Paragraph",
+            "Sec 404-N: NASA / UNESCO Name-Dropping Without Prior Government Sanction",
+            "Sec 505-K: Kshemam Illatha Kadha (Spreading Panic Over Free 500GB Recharge Links)",
+            "Sec 294-G: 5G Radiation Frog Mutation & Stomach Wave Conspiracy Propagation",
+            "Sec 2000-C: Nano-GPS Satellite Currency Tracking Rumormongering Act"
+        ];
+
+        function escapeHTML(str) {
+            return str.replace(/[&<>'"]/g, 
+                tag => ({
+                    '&': '&amp;',
+                    '<': '&lt;',
+                    '>': '&gt;',
+                    "'": '&#39;',
+                    '"': '&quot;'
+                }[tag] || tag)
+            );
+        }
+
+        function generateSatiricalFIR(rawText) {
+            sessionCounter++;
+            document.getElementById('sessionCounterDisplay').innerText = '#' + sessionCounter;
+
+            const firNum = `FIR/2026/KDSPV-${String(sessionCounter).padStart(4, '0')}`;
+            const now = new Date();
+            const dateStr = now.toLocaleDateString('en-GB', { day: '2-digit', month: 'short', year: 'numeric' }) + ' ' + now.toLocaleTimeString('en-US', { hour: '2-digit', minute: '2-digit' });
+            
+            const io = IO_POOL[Math.floor(Math.random() * IO_POOL.length)];
+            const penalty = PUNISHMENTS[Math.floor(Math.random() * PUNISHMENTS.length)];
+            const textLower = rawText.toLowerCase();
+
+            let data = {
+                fir_number: firNum,
+                date: dateStr,
+                complainant: "Cyber Satya Pramanam Automated Radar",
+                accused: "Somasekharan Nair (Chronic Forwardist)",
+                sections: [FAKE_SECTIONS[0], FAKE_SECTIONS[3], FAKE_SECTIONS[1]],
+                summary: `Accused circulated viral text: "${rawText.slice(0, 100)}..." creating confusion and family group chaos.`,
+                remarks: "Varantha thallu. Forward contains zero scientific evidence. Accused claimed 'Somebody sent it to me so I shared it'. Classic forwarding syndrome.",
+                status: "UNDER INVESTIGATION - PHONE SCREENSHOT CAPTURED",
+                stamp: "VERIFIED BOGUS",
+                penalty: penalty,
+                io: io
+            };
+
+            if (textLower.includes('unesco') || textLower.includes('anthem') || textLower.includes('best in')) {
+                data.complainant = "UNESCO Secretary-General (Exhausted)";
+                data.accused = "Suresh 'Forward' Nair (Resident Kudumbam Admin)";
+                data.sections = [
+                    "Sec 404-N: UNESCO Name-Dropping Without Prior Sanction",
+                    "Sec 420-B: Vishwasa Chooshanam (Belief Exploitation)",
+                    "Sec 69-U: Non-Consensual Mandatory 10-Group Forward Extortion"
+                ];
+                data.summary = "Accused fabricated an international cultural certificate from UNESCO on a Sunday morning and blackmailed family members with emotional guilt to forward to 10 contacts.";
+                data.remarks = "Nonsense forward. UNESCO has clarified 4,812 times that they do not conduct global anthem beauty pageants on WhatsApp. Accused's phone was found with 4.2 GB of flower images.";
+                data.status = "CHARGESHEET FILED - PHONE SEIZED";
+                data.stamp = "PHONE SEIZED";
+            } else if (textLower.includes('lemon') || textLower.includes('5g') || textLower.includes('ginger') || textLower.includes('cure') || textLower.includes('radiation') || textLower.includes('doctor')) {
+                data.complainant = "Indian Medical Association & Cyber Health Cell";
+                data.accused = "Uncle Unnikrishnan, Self-Proclaimed Forward MD";
+                data.sections = [
+                    "Sec 153-M: Uncensored Uncle Propaganda & Pseudo-Ayurvedic Menace",
+                    "Sec 294-G: 5G Stomach Radiation Conspiracy Propagation",
+                    "Sec 302-G: Murder of Common Sense in Broad Daylight"
+                ];
+                data.summary = "Accused propagated bogus biological claim that citrus fruit juice can neutralize high-frequency electromagnetic telecommunication frequencies inside the human stomach.";
+                data.remarks = "Entharo entho. Lemon water will at best cause acidity at 4:32 AM, not absorb 5G towers. Accused claims he got information from 'Secret Himalayan Scientist' who is actually a retired clerk in Aluva.";
+                data.status = "UNDER POLICE CUSTODY (TAKING ANTACID)";
+                data.stamp = "UNDER ARREST";
+            } else if (textLower.includes('recharge') || textLower.includes('free') || textLower.includes('jio') || textLower.includes('ambani') || textLower.includes('link') || textLower.includes('loot')) {
+                data.complainant = "Telecom Regulatory Authority & Frustrated Group Members";
+                data.accused = "Vijayan (Active Admin, 'Old Boys 1988 Batch')";
+                data.sections = [
+                    "Sec 505-K: Kshemam Illatha Kadha (Free Recharge Greed Baiting)",
+                    "Sec 420-B: Vishwasa Chooshanam (Loot Link Distribution)",
+                    "Sec 144-W: Unlawful Assembly of Suspicious Links and Phishing Traps"
+                ];
+                data.summary = "Accused did click a malware phishing link promising 500GB free high-speed internet and circulated the malicious URL to 42 distinct family and school reunion chatrooms.";
+                data.remarks = "Ammummade link. No telecom company gives 500GB free for Ambani family birthdays. Accused confessed he only wanted to watch YouTube fishing videos without recharge. Warned strictly.";
+                data.status = "SIM CARD RESTRICTED TO 2G";
+                data.stamp = "SIM SEIZED (2G)";
+            } else if (textLower.includes('chip') || textLower.includes('2000') || textLower.includes('satellite') || textLower.includes('gps')) {
+                data.complainant = "Reserve Bank of India & Department of Space";
+                data.accused = "Gopakumar (Nano-Tech Speculation Officer, Trivandrum)";
+                data.sections = [
+                    "Sec 2000-C: Nano-GPS Satellite Currency Tracking Rumormongering Act",
+                    "Sec 404-N: NASA Space Technology Fabrication Section",
+                    "Sec 302-G: Murder of Common Sense in Broad Daylight"
+                ];
+                data.summary = "Accused insisted that standard paper currency notes possess subterranean satellite connectivity transponders active 120 meters underground without battery source.";
+                data.remarks = "Varantha thallu. Tested 2000 note in forensic laboratory using water and torch. No satellite emerged. Accused stated news anchor on TV looked very confident while saying it.";
+                data.status = "INVESTIGATION ONGOING (MAGNIFYING GLASS DEPLOYED)";
+                data.stamp = "VERIFIED BOGUS";
+            } else if (textLower.includes('morning') || textLower.includes('flower') || textLower.includes('blessing')) {
+                data.complainant = "Society for Prevention of Storage Full Notifications";
+                data.accused = "Kunjamma Aunty (Chief Good Morning Dispatcher, 05:15 AM Shift)";
+                data.sections = [
+                    "Sec 69-U: Non-Consensual Dawn Glitter Image Transmission",
+                    "Sec 144-W: Unlawful Assembly of 45 Glittering Rose Emojis",
+                    "Sec 420-B: Vishwasa Chooshanam (Wasting 12MB Phone Storage Daily)"
+                ];
+                data.summary = "Accused fired 24 high-resolution animated glitter flower images into 9 family groups consecutively between 05:15 AM and 05:45 AM without recipient consent.";
+                data.remarks = "Kandittu sahikkanilla. Complainant's phone storage reached 99.8% capacity with glittering hibiscus files. Mobile gallery sanitized by cyber squad.";
+                data.status = "RESTRICTED TO PLAIN TEXT ONLY";
+                data.stamp = "GALLERY PURGED";
+            }
+
+            return data;
+        }
+
+        function renderDocument(data, rawText) {
+            let sectionsHTML = data.sections.map(s => 
+                `<span class="fir-sec-badge"><span style="margin-right: 4px;">⚖️</span> ${escapeHTML(s)}</span>`
+            ).join('');
+
+            return `
+                <div class="fir-wrapper" id="printable-fir">
+                    <div class="fir-watermark">KDSPV SATIRE</div>
+
+                    <!-- Header -->
+                    <div class="fir-header">
+                        <svg class="fir-emblem-svg" viewBox="0 0 100 100" fill="none">
+                            <circle cx="50" cy="50" r="46" stroke="#2c3e50" stroke-width="4" fill="#f4ebd9"/>
+                            <path d="M50 15 L58 35 L80 35 L62 48 L69 70 L50 56 L31 70 L38 48 L20 35 L42 35 Z" fill="#8b0000"/>
+                            <circle cx="50" cy="50" r="14" fill="#2c3e50"/>
+                            <path d="M44 50 L48 54 L56 46" stroke="#ffffff" stroke-width="3" stroke-linecap="round" stroke-linejoin="round"/>
+                            <text x="50" y="88" font-size="7" font-weight="bold" fill="#2c3e50" text-anchor="middle" font-family="monospace">SATYAMEVA 420</text>
+                        </svg>
+
+                        <p class="fir-dept-mal">കേരള ഡിജിറ്റൽ സത്യ പ്രമാണ വിഭാഗം (സൈബർ ഫോർവേഡ് സെൽ)</p>
+                        <h2 class="fir-dept-eng">KERALA DIGITAL SATYA PRAMANAM VIBHAGAM</h2>
+                        <p class="fir-sub-cell">Cyber Satyameva Bureau — Special Family WhatsApp Cell | STATUTORY FORWARD REGULATION</p>
+                        <div class="fir-main-title">FIRST INFORMATION REPORT (F.I.R.) — FORM NO. 420-M</div>
+                    </div>
+
+                    <!-- Meta Ribbon -->
+                    <div class="fir-meta-bar">
+                        <div><strong>FIR No:</strong> <span>${escapeHTML(data.fir_number)}</span></div>
+                        <div><strong>Date/Time:</strong> <span>${escapeHTML(data.date)}</span></div>
+                        <div><strong>Jurisdiction:</strong> <span>Family WhatsApp Groups</span></div>
+                        <div><strong>Status:</strong> <strong style="color: #b22222;">${escapeHTML(data.status)}</strong></div>
+                    </div>
+
+                    <!-- Parties Grid -->
+                    <div class="fir-grid">
+                        <div class="fir-box">
+                            <div class="fir-box-title">👤 Complainant / Informant</div>
+                            <div class="fir-box-content">
+                                <strong>${escapeHTML(data.complainant)}</strong><br>
+                                <span style="font-size: 11px; color: #555;">Type: Frustrated Recipient / Autonomous Fact-Check Radar</span>
+                            </div>
+                        </div>
+                        <div class="fir-box">
+                            <div class="fir-box-title">🚨 Accused Forwarder / Admin</div>
+                            <div class="fir-box-content">
+                                <strong>${escapeHTML(data.accused)}</strong><br>
+                                <span style="font-size: 11px; color: #555;">Offense: High-Volume Forwarding Without Verification</span>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Sections Invoked -->
+                    <div class="fir-sections-container">
+                        <div class="fir-box-title" style="margin-bottom: 4px;">⚖️ Penal Sections & Cyber Satire Codes Invoked</div>
+                        ${sectionsHTML}
+                    </div>
+
+                    <!-- Raw Evidence Forward -->
+                    <div class="fir-evidence-box">
+                        <div class="fir-evidence-title">📱 Exhibit 'A' — Forwarded Message Transcript</div>
+                        <div class="fir-evidence-text">"${escapeHTML(rawText)}"</div>
+                    </div>
+
+                    <!-- Summary -->
+                    <div class="fir-box" style="margin-bottom: 16px;">
+                        <div class="fir-box-title">📜 Brief Description of Offense</div>
+                        <div class="fir-box-content">${escapeHTML(data.summary)}</div>
+                    </div>
+
+                    <!-- IO Remarks -->
+                    <div class="fir-remarks-box">
+                        <div class="fir-remarks-title">🕵️‍♂️ Investigating Officer (I.O.) Disposition & Remarks</div>
+                        <div class="fir-remarks-text">"${escapeHTML(data.remarks)}"</div>
+                    </div>
+
+                    <!-- Penalty -->
+                    <div class="fir-penalty-banner">
+                        <div style="font-size: 24px;">⚖️</div>
+                        <div>
+                            <span style="text-transform: uppercase; font-size: 10px; letter-spacing: 1px; display: block; color: #856404;">Prescribed Satirical Sanction / Court Order:</span>
+                            ${escapeHTML(data.penalty)}
+                        </div>
+                    </div>
+
+                    <!-- Rubber Stamp -->
+                    <div class="fir-rubber-stamp">${escapeHTML(data.stamp)}</div>
+
+                    <!-- Signatures & Disclaimer Footer -->
+                    <div class="fir-footer">
+                        <div style="max-width: 360px; line-height: 1.3; color: #887766;">
+                            <strong>LEGAL DISCLAIMER:</strong> Satirical parody document generated for <em>TinkerHub Useless Projects</em>. Zero legal validity.
+                        </div>
+                        <div style="text-align: right;">
+                            <div style="font-family: 'Special Elite', monospace; font-size: 14px; color: #1a365d; margin-bottom: 2px;">${escapeHTML(data.io.name.split(' ')[1] || 'Investigator')}...✍️</div>
+                            <div style="font-weight: 700; color: #222;">${escapeHTML(data.io.name)}</div>
+                            <div style="color: #666; font-size: 9.5px;">${escapeHTML(data.io.rank)}, ${escapeHTML(data.io.station)}</div>
+                            <div style="color: #888; font-size: 9px;">Badge: ${escapeHTML(data.io.badge)}</div>
+                        </div>
+                    </div>
+
+                    <!-- Action Bar -->
+                    <div class="fir-action-bar">
+                        <button class="fir-btn" onclick="window.print()">🖨️ Print / Save FIR as PDF</button>
+                    </div>
+                </div>
+            `;
+        }
+
+        document.getElementById('submitBtn').addEventListener('click', () => {
+            const inputVal = document.getElementById('forwardInput').value.trim();
+            const textToProcess = inputVal || "UNESCO declared Indian National Anthem best in the world. Forward to 10 groups.";
+            
+            const data = generateSatiricalFIR(textToProcess);
+            document.getElementById('outputContainer').innerHTML = renderDocument(data, textToProcess);
+        });
+
+        // Setup sample buttons
+        document.querySelectorAll('.sample-pill').forEach(btn => {
+            btn.addEventListener('click', () => {
+                const sampleText = btn.getAttribute('data-text');
+                document.getElementById('forwardInput').value = sampleText;
+                const data = generateSatiricalFIR(sampleText);
+                document.getElementById('outputContainer').innerHTML = renderDocument(data, sampleText);
+            });
+        });
+    </script>
+</body>
+</html>

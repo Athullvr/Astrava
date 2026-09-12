@@ -936,13 +936,13 @@ custom_css = """
 """
 
 def create_ui():
-    theme = gr.themes.Soft(
+    custom_theme = gr.themes.Soft(
         primary_hue="red",
         secondary_hue="slate",
         neutral_hue="stone"
     )
 
-    with gr.Blocks(theme=theme, css=custom_css, title="FIR Report Generator | TinkerHub Useless Projects") as demo:
+    with gr.Blocks(title="FIR Report Generator | TinkerHub Useless Projects", theme=custom_theme, css=custom_css) as demo:
         with gr.Column(elem_id="app-container"):
             
             # App Header
