@@ -7,7 +7,7 @@ A satirical cyber-police FIR (First Information Report) generator designed for *
 ---
 
 ## Basic Details
-### Team Name: Satya Pramanam Squad
+### Team Name: Astrava
 
 ### Team Members
 - Team Lead: Athul V R
@@ -42,8 +42,8 @@ For Software:
 ### Installation
 ```bash
 # Clone the repository
-git clone https://github.com/Athullvr/uselesss-Project.git
-cd uselesss-Project
+git clone https://github.com/Athullvr/astrava.git
+cd astrava
 
 # Create and activate virtual environment
 python3 -m venv .venv

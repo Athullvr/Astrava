@@ -137,12 +137,13 @@ Tone guidelines:
 - React directly and specifically to the absurd claims in the input message.
 """
 
-def format_few_shot_prompt(user_text: str) -> str:
-    prompt = f"{SYSTEM_PROMPT}\n\nHere are examples of how you must format your responses:\n\n"
-    for i, ex in enumerate(FEW_SHOT_EXAMPLES, 1):
-        prompt += f"--- Example {i} ---\nINPUT MESSAGE:\n{ex['input']}\n\nOUTPUT JSON:\n{json.dumps(ex['output'], indent=2)}\n\n"
-    prompt += f"--- Real Case ---\nINPUT MESSAGE:\n{user_text}\n\nOUTPUT JSON:\n"
-    return prompt
+def build_few_shot_messages(user_text: str) -> list:
+    messages = [{"role": "system", "content": SYSTEM_PROMPT}]
+    for ex in FEW_SHOT_EXAMPLES:
+        messages.append({"role": "user", "content": ex["input"]})
+        messages.append({"role": "assistant", "content": json.dumps(ex["output"])})
+    messages.append({"role": "user", "content": user_text})
+    return messages
 
 # --- INTELLIGENT SATIRICAL FALLBACK ENGINE (PHASE 4 SAFETY NET) ---
 
@@ -302,31 +303,33 @@ def clean_and_parse_json(text: str) -> dict:
         cleaned = re.sub(r",\s*([\]}])", r"\1", text)
         return json.loads(cleaned)
 
-def generate_fir(user_text: str, custom_token: str = "") -> tuple:
-    """Core function to generate FIR JSON via HF Inference API with graceful fallback."""
+def generate_fir(user_text: str = "", custom_token: str = "") -> tuple:
+    """Core function to generate FIR JSON via HF Inference API with graceful fallback and transparent engine tracking."""
     global SESSION_CASE_COUNTER
     SESSION_CASE_COUNTER += 1
     
     fir_number = f"FIR/2026/KDSPV-{SESSION_CASE_COUNTER:04d}"
     io_officer = random.choice(IO_POOL)
     
-    if not user_text or not user_text.strip():
-        user_text = "Good Morning! UNESCO declares this the best message of all time. Forward to 10 people."
+    raw_text = (user_text or "").strip()
+    if not raw_text:
+        raw_text = "Good Morning! UNESCO declares this the best message of all time. Forward to 10 people."
 
-    token = custom_token.strip() or os.getenv("HF_TOKEN", "").strip() or os.getenv("HUGGINGFACEHUB_API_TOKEN", "").strip()
+    token = (custom_token or "").strip() or os.getenv("HF_TOKEN", "").strip() or os.getenv("HUGGINGFACEHUB_API_TOKEN", "").strip()
     
     fir_data = None
-    engine_used = "Local Satire Humor Engine"
+    engine_used = ""
+    last_error = ""
 
-    # If token available, attempt Hugging Face Inference API with 10s timeout
+    # If token available, attempt Hugging Face Chat Completion API with 10s timeout
     if token:
         try:
             from huggingface_hub import InferenceClient
             client = InferenceClient(token=token, timeout=10.0)
             
-            prompt = format_few_shot_prompt(user_text)
+            messages = build_few_shot_messages(raw_text)
             
-            # Use reliable fast instruction model
+            # Use reliable instruct models supporting Chat Completion
             model_candidates = [
                 "meta-llama/Llama-3.2-3B-Instruct",
                 "Qwen/Qwen2.5-7B-Instruct",
@@ -335,28 +338,36 @@ def generate_fir(user_text: str, custom_token: str = "") -> tuple:
             
             for model_id in model_candidates:
                 try:
-                    response = client.text_generation(
-                        prompt,
+                    response = client.chat_completion(
+                        messages=messages,
                         model=model_id,
-                        max_new_tokens=600,
+                        max_tokens=600,
                         temperature=0.7,
                         top_p=0.9,
-                        return_full_text=False
                     )
-                    parsed = clean_and_parse_json(response)
+                    generated_text = response.choices[0].message.content
+                    parsed = clean_and_parse_json(generated_text)
                     if parsed and "sections_invoked" in parsed:
                         fir_data = parsed
-                        engine_used = f"Hugging Face ({model_id})"
+                        engine_used = model_id
                         break
                 except Exception as model_err:
+                    last_error = str(model_err)
                     print(f"HF Model {model_id} error: {model_err}")
                     continue
         except Exception as api_err:
-            print(f"HF Inference Error: {api_err}")
+            last_error = str(api_err)
+            print(f"HF Client Initialization/Inference Error: {api_err}")
 
-    # Fallback to local high-humor engine if HF failed or no token
+    # Fallback to local satire humor engine if HF failed or no token
     if not fir_data or not isinstance(fir_data, dict) or "sections_invoked" not in fir_data:
-        fir_data = generate_satirical_fallback(user_text, fir_number, io_officer)
+        fir_data = generate_satirical_fallback(raw_text, fir_number, io_officer)
+        if not token:
+            status_note = f"⚠️ No HF token provided — using Local Satire Engine | Case #{SESSION_CASE_COUNTER}"
+        else:
+            status_note = f"⚠️ HF API error ({last_error}) — used Local Satire Engine as backup | Case #{SESSION_CASE_COUNTER}"
+    else:
+        status_note = f"✅ Generated by Hugging Face ({engine_used}) | Case #{SESSION_CASE_COUNTER}"
 
     # Ensure all required keys exist (defensive schema validation)
     fir_data.setdefault("fir_number", fir_number)
@@ -364,7 +375,7 @@ def generate_fir(user_text: str, custom_token: str = "") -> tuple:
     fir_data.setdefault("complainant_name", "Anti-Rumor Special Task Force")
     fir_data.setdefault("accused", "Unverified WhatsApp Forwarder")
     fir_data.setdefault("sections_invoked", ["Sec 420-B: Vishwasa Chooshanam", "Sec 302-G: Murder of Common Sense"])
-    fir_data.setdefault("incident_summary", f"Accused forwarded message: '{user_text[:100]}...'")
+    fir_data.setdefault("incident_summary", f"Accused forwarded message: '{raw_text[:100]}...'")
     fir_data.setdefault("io_remarks", "Entharo entho. Case registered for spreading unverified claims.")
     fir_data.setdefault("case_status", "CHARGESHEET FILED - PENDING INTERROGATION")
     fir_data.setdefault("penalty", random.choice(PUNISHMENT_BANK))
@@ -376,9 +387,8 @@ def generate_fir(user_text: str, custom_token: str = "") -> tuple:
     fir_data["io_badge"] = io_officer["badge"]
 
     # Render HTML card
-    card_html = render_fir_card(fir_data, user_text)
+    card_html = render_fir_card(fir_data, raw_text)
     raw_json_str = json.dumps(fir_data, indent=2)
-    status_note = f"✅ FIR Generated successfully using **{engine_used}** | Case Counter: **#{SESSION_CASE_COUNTER}**"
 
     return card_html, raw_json_str, status_note
 
@@ -914,7 +924,7 @@ SAMPLE_FORWARDS = [
 
 custom_css = """
 #app-container {
-    max-width: 1200px;
+    max-width: 1260px;
     margin: 0 auto;
     font-family: 'Segoe UI', system-ui, -apple-system, sans-serif;
 }
@@ -923,15 +933,26 @@ custom_css = """
     background: #e63946;
     color: white;
     font-weight: bold;
-    padding: 4px 12px;
-    border-radius: 20px;
-    font-size: 12px;
+    padding: 3px 10px;
+    border-radius: 16px;
+    font-size: 11px;
     text-transform: uppercase;
     letter-spacing: 1px;
 }
-.sample-btn {
-    text-align: left !important;
+.status-ticker {
     font-size: 12px !important;
+    color: #94a3b8 !important;
+    padding: 6px 12px !important;
+    border-radius: 6px !important;
+    background: rgba(15, 23, 42, 0.6) !important;
+    border: 1px solid #334155 !important;
+    margin-bottom: 10px !important;
+    display: block !important;
+}
+.status-ticker p {
+    margin: 0 !important;
+    font-size: 12px !important;
+    line-height: 1.4 !important;
 }
 """
 
@@ -942,7 +963,7 @@ def create_ui():
         neutral_hue="stone"
     )
 
-    with gr.Blocks(title="FIR Report Generator | TinkerHub Useless Projects", theme=custom_theme, css=custom_css) as demo:
+    with gr.Blocks(title="FIR Report Generator | TinkerHub Useless Projects") as demo:
         with gr.Column(elem_id="app-container"):
             
             # App Header
@@ -954,53 +975,55 @@ def create_ui():
                 <span class="header-badge">TinkerHub Useless Project 3.0</span>
                 &nbsp; **Turning absurd family group forwards, fake cures, and 6 AM Good Morning spam into official-looking satirical police FIRs.**
                 
-                > ⚠️ **Satire Notice**: *This tool produces humorous parody reports for entertainment and hackathon demonstration only. Not a real police complaint.*
+                > ⚠️ **Satire Notice**: *Parody document created for hackathon entertainment. Not a real police complaint.*
                 """
             )
 
             with gr.Row():
-                # Left Column: Inputs & Controls
-                with gr.Column(scale=5):
-                    gr.Markdown("### 📥 1. Paste WhatsApp Forward Message")
+                # Left Column: Inputs & Controls (Lean & focused, scale=4)
+                with gr.Column(scale=4):
+                    gr.Markdown("### 📥 1. Paste WhatsApp Forward")
                     input_text = gr.Textbox(
                         label="Suspicious WhatsApp Forward / Rumor / Good Morning Spam",
-                        placeholder="Paste the ridiculous forward here (e.g. UNESCO declared best anthem, hot lemon water 5G cure, free recharge links...)",
-                        lines=6,
+                        placeholder="Paste suspicious forward here (e.g. UNESCO anthem award, hot lemon water 5G cure, Ambani 500GB recharge...)",
+                        lines=5,
                         elem_id="input_box"
                     )
 
-                    with gr.Accordion("⚙️ Optional: Hugging Face API Token (Uses fallback humor engine if blank)", open=False):
+                    submit_btn = gr.Button("🚨 File FIR & Issue Arrest Warrant", variant="primary", size="lg")
+
+                    with gr.Accordion("⚙️ Using your own HF token? Click here", open=False):
                         hf_token_input = gr.Textbox(
                             label="Hugging Face User Access Token (Optional)",
-                            placeholder="hf_xxxxxxxxxxxxxxxxxxxxxxxx (leave blank to use built-in humor engine)",
+                            placeholder="hf_xxxxxxxxxxxxxxxxxxxxxxxx (uses built-in engine if blank)",
                             type="password"
                         )
-                        gr.Markdown("<small>If no token is supplied or if HF API times out (>10s), our built-in satirical humor engine generates the FIR instantly with zero downtime.</small>")
+                        gr.Markdown("<small>Optional. If blank or on timeout (>10s), our built-in satirical humor engine runs automatically.</small>")
 
-                    submit_btn = gr.Button("🚨 File FIR & Issue Arrest Warrant", variant="primary", size="lg")
-                    status_output = gr.Markdown("🟢 System Ready. Awaiting suspicious forward input...")
+                    with gr.Accordion("💡 Try a sample forward (Click to load)", open=False):
+                        gr.Examples(
+                            examples=SAMPLE_FORWARDS,
+                            inputs=[input_text],
+                            label="Common Kerala WhatsApp Forward Tropes"
+                        )
 
-                    gr.Markdown("#### 💡 Quick Test Presets (Click to load sample forward):")
-                    gr.Examples(
-                        examples=SAMPLE_FORWARDS,
-                        inputs=[input_text],
-                        label="Common Kerala WhatsApp Forward Tropes"
-                    )
-
-                # Right Column: Generated FIR Output
-                with gr.Column(scale=6):
+                # Right Column: Generated FIR Document Hero (scale=7)
+                with gr.Column(scale=7):
                     gr.Markdown("### 📜 2. Official Generated F.I.R. Document")
+                    status_output = gr.Markdown("🟢 **System Ready** | Awaiting suspicious forward input...", elem_classes=["status-ticker"])
+                    
                     fir_html_output = gr.HTML(
                         value="""
-                        <div style="text-align: center; padding: 60px 20px; background: #faf6ea; border: 2px dashed #bbb; border-radius: 6px; color: #666; font-family: monospace;">
+                        <div style="text-align: center; padding: 70px 20px; background: #faf6ea; border: 2px dashed #bbb; border-radius: 6px; color: #666; font-family: monospace;">
                             <h3>⚖️ NO ACTIVE CASE FILED</h3>
                             <p>Paste a WhatsApp forward on the left and click <strong>'File FIR'</strong> to generate an authentic official report with rubber stamps and penalties.</p>
                         </div>
                         """
                     )
 
-                    with gr.Accordion("🔍 Raw FIR JSON Schema (Debug / Inspector)", open=False):
-                        raw_json_output = gr.Code(label="JSON Output", language="json")
+            # Bottom Debug / Developer Accordion (out of primary view)
+            with gr.Accordion("🛠️ Developer / Debug View (Raw JSON Schema)", open=False):
+                raw_json_output = gr.Code(label="JSON Output", language="json")
 
             # Wire up interactions
             submit_btn.click(
@@ -1013,13 +1036,14 @@ def create_ui():
             gr.Markdown(
                 """
                 ---
-                Made with ❤️ at **TinkerHub Useless Projects** | Powered by Gradio & Satirical Digital Cyber Intelligence
+                Made with ❤️ at **TinkerHub Useless Projects** | Team Astrava
                 """
             )
 
-    return demo
+    return demo, custom_theme, custom_css
 
 if __name__ == "__main__":
-    app = create_ui()
+    app, theme, css = create_ui()
     # Launch with local server
-    app.launch(server_name="0.0.0.0", server_port=7860, share=False)
+    app.launch(server_name="0.0.0.0", server_port=7860, theme=theme, css=css, share=False)
+
